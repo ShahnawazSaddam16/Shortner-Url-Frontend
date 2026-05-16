@@ -91,11 +91,9 @@ router.post("/shortner-url", async (req, res) => {
 router.get("/:code", async (req, res) => {
     try {
         const { code } = req.params;
-        const { password } = req.body;
+        const { password } = req.query; 
 
-        const url = await Url.findOne({
-            shortCode: code,
-        });
+        const url = await Url.findOne({ shortCode: code });
 
         if (!url) {
             return res.status(404).json({
@@ -104,16 +102,14 @@ router.get("/:code", async (req, res) => {
             });
         }
 
-        if (
-            url.expiresAt &&
-            new Date() > new Date(url.expiresAt)
-        ) {
+        if (url.expiresAt && new Date() > new Date(url.expiresAt)) {
             return res.status(400).json({
                 success: false,
                 message: "Link expired",
             });
         }
 
+        // 🔐 password check
         if (url.password) {
             if (!password) {
                 return res.status(401).json({
@@ -122,10 +118,7 @@ router.get("/:code", async (req, res) => {
                 });
             }
 
-            const isMatch = await bcrypt.compare(
-                password,
-                url.password
-            );
+            const isMatch = await bcrypt.compare(password, url.password);
 
             if (!isMatch) {
                 return res.status(401).json({
@@ -136,7 +129,6 @@ router.get("/:code", async (req, res) => {
         }
 
         url.clicks += 1;
-
         url.analytics.push({
             ip: req.ip,
             device: req.headers["user-agent"],
