@@ -176,43 +176,39 @@ form.addEventListener("submit", async (e) => {
   const expiryDate = document.getElementById("expiryDate").value;
   const password = document.getElementById("password").value;
 
-  try {
-    const res = await fetch("http://localhost:5000/api/shortner-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        originalUrl,
-        customCode,
-        expiryDate,
-        password,
-      }),
-    });
+  const res = await fetch("http://localhost:5000/api/shortner-url", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      originalUrl,
+      customCode,
+      expiryDate,
+      password,
+    }),
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (!data.success) {
-      resultBox.style.display = "none";
-      message.innerHTML = `<p class="error">${data.message}</p>`;
-      return;
-    }
-
-    resultBox.style.display = "block";
-
-    shortUrlEl.textContent = data.shortUrl;
-    shortUrlEl.href = data.shortUrl;
-
-    qrCodeEl.src = data.data.qrCode;
-
-    message.innerHTML = `<p class="success">URL Shortened Successfully</p>`;
-
-  } catch (err) {
-    message.innerHTML = `<p class="error">${err.message}</p>`;
+  if (!data.success) {
+    resultBox.style.display = "none";
+    message.innerHTML = `<p class="error">${data.message}</p>`;
+    return;
   }
+
+  resultBox.style.display = "block";
+
+  shortUrlEl.textContent = data.shortUrl;
+  shortUrlEl.href = data.shortUrl;
+
+  shortUrlEl.dataset.protected = data.data.isProtected ? "1" : "0";
+
+  qrCodeEl.src = data.data.qrCode;
+
+  message.innerHTML = `<p class="success">URL Shortened Successfully</p>`;
 });
 
 
-// ✅ FIX: handle password when user clicks short URL
-shortUrlEl.addEventListener("click", async (e) => {
+shortUrlEl.addEventListener("click", (e) => {
   e.preventDefault();
 
   const url = new URL(shortUrlEl.href);
@@ -220,20 +216,18 @@ shortUrlEl.addEventListener("click", async (e) => {
 
   let finalUrl = shortUrlEl.href;
 
-  try {
-    const password = prompt("Enter password (if required):");
+  if (shortUrlEl.dataset.protected === "1") {
+    const password = prompt("Enter password:");
+    if (!password) return;
 
-    if (password) {
-      finalUrl = `${url.origin}/${code}?password=${encodeURIComponent(password)}`;
-    }
-
-    window.location.href = finalUrl;
-
-  } catch (err) {
-    alert("Error opening link");
+    finalUrl = `${url.origin}/${code}?password=${encodeURIComponent(password)}`;
   }
+
+  window.location.href = finalUrl;
 });
 </script>
+
+
 
 </body>
 </html>
