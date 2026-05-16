@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Secure URL Shortener</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      background:#0f172a;
+      color:white;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+
+    .container{
+      width:100%;
+      max-width:500px;
+      background:#1e293b;
+      padding:30px;
+      border-radius:20px;
+      box-shadow:0 0 20px rgba(0,0,0,0.4);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:25px;
+      color:#38bdf8;
+    }
+
+    .input-group{
+      margin-bottom:18px;
+    }
+
+    label{
+      display:block;
+      margin-bottom:8px;
+      font-size:14px;
+    }
+
+    input{
+      width:100%;
+      padding:12px;
+      border:none;
+      outline:none;
+      border-radius:10px;
+      background:#334155;
+      color:white;
+      font-size:15px;
+    }
+
+    button{
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:10px;
+      background:#38bdf8;
+      color:black;
+      font-weight:bold;
+      cursor:pointer;
+      font-size:16px;
+      transition:0.3s;
+    }
+
+    button:hover{
+      background:#0ea5e9;
+    }
+
+    .result{
+      margin-top:25px;
+      padding:15px;
+      background:#334155;
+      border-radius:12px;
+      display:none;
+    }
+
+    .result a{
+      color:#38bdf8;
+      word-break:break-all;
+    }
+
+    .qr{
+      margin-top:15px;
+      text-align:center;
+    }
+
+    .qr img{
+      width:180px;
+      height:180px;
+      border-radius:10px;
+      background:white;
+      padding:10px;
+    }
+
+    .error{
+      color:#ef4444;
+      margin-top:10px;
+      text-align:center;
+    }
+
+    .success{
+      color:#22c55e;
+      margin-top:10px;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Secure URL Shortener</h1>
+
+    <form id="urlForm">
+
+      <div class="input-group">
+        <label>Original URL</label>
+        <input
+          type="text"
+          id="originalUrl"
+          placeholder="https://example.com"
+          required
+        />
+      </div>
+
+      <div class="input-group">
+        <label>Custom Code (Optional)</label>
+        <input
+          type="text"
+          id="customCode"
+          placeholder="my-link"
+        />
+      </div>
+
+      <div class="input-group">
+        <label>Expiry Date (Optional)</label>
+        <input
+          type="date"
+          id="expiryDate"
+        />
+      </div>
+
+      <div class="input-group">
+        <label>Password (Optional)</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter password"
+        />
+      </div>
+
+      <button type="submit">
+        Generate Short URL
+      </button>
+
+    </form>
+
+    <div id="message"></div>
+
+    <div class="result" id="resultBox">
+
+      <h3>Short URL</h3>
+
+      <a id="shortUrl" target="_blank"></a>
+
+      <div class="qr">
+        <img id="qrCode" />
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const form = document.getElementById("urlForm");
+    const resultBox = document.getElementById("resultBox");
+    const shortUrlEl = document.getElementById("shortUrl");
+    const qrCodeEl = document.getElementById("qrCode");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      message.innerHTML = "";
+
+      const originalUrl =
+        document.getElementById("originalUrl").value;
+
+      const customCode =
+        document.getElementById("customCode").value;
+
+      const expiryDate =
+        document.getElementById("expiryDate").value;
+
+      const password =
+        document.getElementById("password").value;
+
+      try {
+
+        const res = await fetch(
+          "http://localhost:5000/shortner-url",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              originalUrl,
+              customCode,
+              expiryDate,
+              password,
+            }),
+          }
+        );
+
+        const data = await res.json();
+
+        if (!data.success) {
+          resultBox.style.display = "none";
+
+          message.innerHTML = `
+            <p class="error">${data.message}</p>
+          `;
+
+          return;
+        }
+
+        resultBox.style.display = "block";
+
+        shortUrlEl.href = data.shortUrl;
+        shortUrlEl.textContent = data.shortUrl;
+
+        qrCodeEl.src = data.data.qrCode;
+
+        message.innerHTML = `
+          <p class="success">
+            URL Shortened Successfully
+          </p>
+        `;
+
+      } catch (err) {
+
+        message.innerHTML = `
+          <p class="error">
+            ${err.message}
+          </p>
+        `;
+
+      }
+    });
+  </script>
+
+</body>
+</html>
