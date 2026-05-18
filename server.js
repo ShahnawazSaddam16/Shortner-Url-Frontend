@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const dbConnection = require("./src/utils/dbConnection");
 const UrlControllers = require("./src/controllers/urlControllers");
+const Auth = require("./src/controllers/auth");
 
 const app = express();
 dotenv.config();
@@ -15,7 +16,7 @@ app.use(
   cors({
     origin: [
       "http://127.0.0.1:5500",
-      "http://localhost:5500",
+      "http://localhost:3000",
     ],
     methods: ["GET", "POST"],
     credentials: true,
@@ -38,6 +39,7 @@ const limiter = rateLimit({
 dbConnection();
 
 //Routes
+app.use("/api/auth", Auth, limiter);
 app.use("/api", UrlControllers, limiter);
 
 //App Listen
