@@ -2,6 +2,7 @@ const express = require("express");
 const rateLimit = require("express-rate-limit");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const dbConnection = require("./src/utils/dbConnection");
 const UrlControllers = require("./src/controllers/urlControllers");
 const Auth = require("./src/controllers/auth");
@@ -12,6 +13,7 @@ const PORT = process.env.PORT;
 
 //Middleware
 app.use(express.json());
+app.use(cookieParser());
 app.use(
   cors({
     origin: [
