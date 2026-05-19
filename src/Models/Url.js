@@ -2,16 +2,18 @@ const mongoose = require("mongoose");
 
 const urlSchema = new mongoose.Schema(
   {
-
     originalUrl: {
       type: String,
       required: true,
+      trim: true,
     },
 
     shortCode: {
       type: String,
       unique: true,
       required: true,
+      trim: true,
+      lowercase: true,
     },
 
     customCode: {
@@ -26,22 +28,51 @@ const urlSchema = new mongoose.Schema(
 
     qrCode: {
       type: String,
+      default: null,
     },
 
     password: {
       type: String,
+      default: null,
+      select: false,
     },
 
     expiresAt: {
       type: Date,
+      default: null,
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
     },
 
     analytics: [
       {
-        ip: String,
-        country: String,
-        city: String,
-        device: String,
+        ip: {
+          type: String,
+        },
+
+        country: {
+          type: String,
+        },
+
+        city: {
+          type: String,
+        },
+
+        device: {
+          type: String,
+        },
+
         clickedAt: {
           type: Date,
           default: Date.now,
@@ -49,7 +80,9 @@ const urlSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 module.exports = mongoose.model("Url", urlSchema);

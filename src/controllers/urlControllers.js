@@ -2,18 +2,17 @@ const express = require("express");
 const router = express.Router();
 const Url = require("../Models/Url");
 const dotenv = require("dotenv");
+const bcrypt = require("bcryptjs");
+const validUrl = require("valid-url");
+const { nanoid } = require("nanoid");
 
 const generateQR = require("../utils/qrGenerator");
 const malwareCheck = require("../middleware/malewareChecker");
-const {authMiddleware} = require("../middleware/authMiddleware");
-
-const validUrl = require("valid-url");
-const { nanoid } = require("nanoid");
-const bcrypt = require("bcryptjs");
+const { authMiddleware } = require("../middleware/authMiddleware");
 
 dotenv.config();
 
-router.post("/shortner-url",  async (req, res) => {
+router.post("/shortner-url", authMiddleware, async (req, res) => {
   try {
     const { originalUrl, customCode, expiryDate, password } = req.body;
 
@@ -68,13 +67,21 @@ router.post("/shortner-url",  async (req, res) => {
       expiresAt: expiryDate || null,
       password: hashedPassword,
       qrCode,
+      createdBy: req.user._id,
+      email: req.user.email,
     });
 
     res.status(201).json({
       success: true,
+      message: "Short URL created successfully",
+      user: {
+        name: req.user.name,
+        email: req.user.email,
+      },
       shortUrl,
       data: newUrl,
     });
+
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -107,12 +114,12 @@ router.get("/:code", async (req, res) => {
     if (url.password) {
       if (!password) {
         return res.status(401).send(`
-            <script>
-                const pass = prompt("Enter password:");
-                if (pass) {
-                    window.location.href = window.location.href + "?password=" + encodeURIComponent(pass);
-                }
-            </script>
+          <script>
+            const pass = prompt("Enter password:");
+            if (pass) {
+              window.location.href = window.location.href + "?password=" + encodeURIComponent(pass);
+            }
+          </script>
         `);
       }
 
@@ -124,6 +131,7 @@ router.get("/:code", async (req, res) => {
     }
 
     url.clicks += 1;
+
     url.analytics.push({
       ip: req.ip,
       device: req.headers["user-agent"],
@@ -133,6 +141,7 @@ router.get("/:code", async (req, res) => {
     await url.save();
 
     return res.redirect(url.originalUrl);
+
   } catch (err) {
     res.status(500).json({
       success: false,
