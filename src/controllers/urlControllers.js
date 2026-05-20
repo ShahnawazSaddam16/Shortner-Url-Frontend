@@ -273,7 +273,7 @@ router.delete("/deleting-url/:id", authMiddleware, async (req, res) => {
       createdBy: req.user._id,
     });
 
-    if (!deleteUrl) {
+    if (!deletedUrl) {
       return res
         .status(404)
         .json({ success: false, message: "Url not found or aunthorized" });
