@@ -271,9 +271,9 @@ router.delete("/deleting-url/:id", authMiddleware, async (req, res) => {
     const deletedUrl = await Url.findOneAndDelete({
       _id: id,
       createdBy: req.user._id,
-    });
+    }).exec();
 
-    if (!deletedUrl) {
+    if (deletedUrl === null || deletedUrl === undefined) {
       return res.status(404).json({
         success: false,
         message: "URL not found or you are not authorized to delete it",
@@ -289,7 +289,7 @@ router.delete("/deleting-url/:id", authMiddleware, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: err.message,
     });
