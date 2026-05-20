@@ -106,12 +106,19 @@ router.get("/user-urls", authMiddleware, async (req, res) => {
       createdAt: u.createdAt,
     }));
 
+    const totalShortUrls = formatted.length;
+    const totalClicks = formatted.reduce(
+      (sum, item) => sum + item.clicks,
+      0
+    );
+
     res.status(200).json({
       success: true,
       message: "Data Fetched Successfully",
       user_urls: formatted,
+      totalShortUrls,
+      totalClicks,
     });
-
   } catch (err) {
     res.status(500).json({
       success: false,
