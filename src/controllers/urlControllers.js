@@ -10,7 +10,6 @@ const rateLimit = require("express-rate-limit");
 const generateQR = require("../utils/qrGenerator");
 const malwareCheck = require("../middleware/malewareChecker");
 const { authMiddleware } = require("../middleware/authMiddleware");
-const { ReturnDocument } = require("mongodb");
 const auth = require("../Models/auth");
 
 dotenv.config();
