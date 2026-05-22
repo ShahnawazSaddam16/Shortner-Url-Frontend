@@ -80,8 +80,7 @@ router.put("/plan", authMiddleware, async (req, res) => {
 router.get("/plan", authMiddleware, async (req, res) => {
     try {
         const plan = await Plans.findOne({
-            user: req.user._id,
-            email: req.user.email
+            email
         });
 
         if (!plan) {
