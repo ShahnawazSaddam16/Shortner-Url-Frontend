@@ -28,6 +28,17 @@ const shortUrlLimiter = rateLimit({
 
 router.post("/shortner-url", authMiddleware, async (req, res) => {
   try {
+    const userUrlCount = await Url.countDocuments({
+      createdBy: req.user._id,
+    });
+
+    if (userUrlCount >= 20) {
+      return res.status(403).json({
+        success: false,
+        message: "Free plan limit reached. Upgrade to create more URLs.",
+      });
+    }
+
     const { originalUrl, customCode, expiryDate, password } = req.body;
 
     if (!originalUrl) {
