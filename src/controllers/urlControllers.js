@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const bcrypt = require("bcryptjs");
 const validUrl = require("valid-url");
 const { nanoid } = require("nanoid");
+const rateLimit = require("express-rate-limit");
 
 const generateQR = require("../utils/qrGenerator");
 const malwareCheck = require("../middleware/malewareChecker");
@@ -13,6 +14,17 @@ const { ReturnDocument } = require("mongodb");
 const auth = require("../Models/auth");
 
 dotenv.config();
+
+const shortUrlLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many requests, please try again later",
+  },
+});
 
 router.post("/shortner-url", authMiddleware, async (req, res) => {
   try {
@@ -125,7 +137,7 @@ router.get("/user-urls", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/:code", async (req, res) => {
+router.get("/:code", shortUrlLimiter, async (req, res) => {
   try {
     const { code } = req.params;
     const { password } = req.query;
