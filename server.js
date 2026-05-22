@@ -43,9 +43,9 @@ const limiter = rateLimit({
 dbConnection();
 
 //Routes
-app.use("/api/auth", Auth, limiter);
-app.use("/api", UrlControllers, limiter);
-app.use("/api", Plans, limiter);
+app.use("/api/auth", limiter, Auth);
+app.use("/api", limiter, UrlControllers);
+app.use("/api", limiter, Plans);
 
 //App Listen
 app.listen(PORT,(err)=>{
