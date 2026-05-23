@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const plansSchema = new mongoose.Schema({
-    user: {
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,

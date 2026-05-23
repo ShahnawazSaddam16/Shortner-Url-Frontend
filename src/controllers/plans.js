@@ -15,7 +15,7 @@ router.post("/plan", authMiddleware, async (req, res) => {
         }
 
         const plan = await Plans.findOneAndUpdate(
-            { user: req.user._id },
+            { createdBy: req.user._id },
             {
                 planStatus,
                 planCategory,
@@ -51,7 +51,7 @@ router.put("/plan", authMiddleware, async (req, res) => {
         }
 
         const plan = await Plans.findOneAndUpdate(
-            { user: req.user._id },
+            { createdBy: req.user._id },
             {
                 planStatus,
                 planCategory,
@@ -84,7 +84,7 @@ router.put("/plan", authMiddleware, async (req, res) => {
 
 router.get("/plan", authMiddleware, async (req, res) => {
     try {
-        const plan = await Plans.findOne({ user: req.user._id });
+        const plan = await Plans.findOne({ createdBy: req.user._id });
 
         if (!plan) {
             return res.status(404).json({
