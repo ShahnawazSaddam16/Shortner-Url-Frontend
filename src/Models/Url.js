@@ -43,7 +43,6 @@ const urlSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-urlSchema.index({ shortCode: 1 });
 urlSchema.index({ email: 1 });
 urlSchema.index({ createdBy: 1 });
 urlSchema.index({ expiresAt: 1 });
